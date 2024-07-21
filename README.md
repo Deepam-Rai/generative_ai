@@ -3,6 +3,8 @@ Testing and testing different techniques for generative AI.
 
 ----
 ## Markov chains
+Trains on the given data and tries to generate similar sentences.  
+  
 To run:  
 ```shell
 # Default values: k=3, chain_length=50,  Dataset= ./data/Sherlock_Holmes
