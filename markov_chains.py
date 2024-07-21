@@ -1,15 +1,15 @@
 # Reference: https://www.kdnuggets.com/2019/11/markov-chains-train-text-generation.html
-import os
 import random
 import re
+import sys
 from pathlib import Path
 from typing import List, Dict
-from pypdf import PdfReader
+
 from scipy.sparse import dok_matrix
 import logging
 import coloredlogs
 from constants import *
-
+from utils import get_text
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -26,42 +26,14 @@ class MarkovGen:
     def __init__(self, file_paths: List[Path]):
         self.k: int = None
         self.k_words_index_map: dict = None
-        self.corpus_index_map: dict = None
         self.k_matrix: dok_matrix = None
         self.paths: List[Path] = file_paths
-        text = self.get_text(self.paths)
+        text = get_text(self.paths)
         self.text: str = self.clean_text(text)
         corpus = list(self.text.split(' '))
         corpus = list(filter(lambda x: x != '', corpus))
-        logger.info(f"Total tokens: {len(corpus)}")
-        self.corpus_index_map = {word: idx for idx, word in enumerate(list(set(corpus)))}
-
-
-    def get_text(self, file_paths: List[Path]) -> str:
-        """
-        :param file_paths: list of filepaths
-        :return: extracted text
-        """
-        text = ""
-        for path in file_paths:
-            if os.path.isdir(path):
-                logger.info(f"extracting from directory: {path}")
-                files = [path/f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
-            else:
-                logger.info(f"extracting from file: {path}")
-                files = [path]
-            for file_name in files:
-                _, file_extension = os.path.splitext(file_name)
-                if file_extension.lower() == '.pdf':
-                    reader = PdfReader(file_name)
-                    for page in reader.pages:
-                        text += ' ' + page.extract_text()
-                elif file_extension.lower() == '.txt':
-                    with open(file_name, 'r') as f:
-                        text += ' ' + f.read()
-                else:
-                    raise ValueError(f"Unknown filetype: {file_name}")
-        return text
+        logger.info(f"Corpus size: {len(corpus)}")
+        self.tokens_index_map = {word: idx for idx, word in enumerate(list(set(corpus)))}
 
     def clean_text(self, text: str) -> str:
         """
@@ -81,7 +53,7 @@ class MarkovGen:
         """
         Creates a matrix that maps conditional probability of next word in the sentence,
         given past k words in the sentence.
-        :param corpus_index_map:
+        :param tokens_index_map:
         :param k: past-k words to be considered
         :param text:
         :return:
@@ -92,13 +64,13 @@ class MarkovGen:
         corpus = list(self.text.split(' '))
         corpus = list(filter(lambda x: x != '', corpus))
         set_of_k_words = [' '.join(corpus[i:i+k]) for i in range(len(corpus)-k)]
-        count_distinct_words = len(self.corpus_index_map)
+        count_distinct_words = len(self.tokens_index_map)
         k_words_distinct = list(set(set_of_k_words))
         self.k_words_index_map = {s: idx for idx, s in enumerate(k_words_distinct)}
         k_matrix = dok_matrix((len(k_words_distinct), count_distinct_words))
         for i, last_k in enumerate(set_of_k_words[:-k]):
             last_k_words_row = self.k_words_index_map[last_k]
-            next_word_col = self.corpus_index_map[corpus[i+k]]
+            next_word_col = self.tokens_index_map[corpus[i + k]]
             k_matrix[last_k_words_row, next_word_col] += 1
         self.k_matrix = k_matrix
         return self.k_matrix
@@ -112,9 +84,17 @@ class MarkovGen:
         """
         next_word_vector = self.k_matrix[self.k_words_index_map[seq]] + alpha
         likelihoods = next_word_vector/next_word_vector.sum()
-        return random.choices(list(self.corpus_index_map.keys()), likelihoods.toarray()[0])[0]
+        return random.choices(list(self.tokens_index_map.keys()), likelihoods.toarray()[0])[0]
 
     def stochastic_chain(self, seed: str = None, chain_length: int = 15):
+        """
+        Returns sentence with added words equal to 'chain_length'.
+        The last k-word phrase of the seed sentence need to be present in some part of the training dataset.
+
+        :param seed: If None, randomly generates seed sentence.
+        :param chain_length: Added words to be generated.
+        :return: seed sentence + generated sentence.
+        """
         if seed is None:
             seed = random.choice(list(self.k_words_index_map.keys()))
         current_words = seed.split(' ')
@@ -122,6 +102,8 @@ class MarkovGen:
             raise ValueError(f"Seed length must be at-least as long as {self.k}")
         sentence = seed
         current_words = current_words[-self.k:]
+        if self.k_words_index_map.get(' '.join(current_words), None) is None:
+            raise ValueError("The last k-word phrase of the seed sentence need to be present in some part of the training dataset.")
         for _ in range(chain_length):
             sentence += ' '
             next_word = self.sample_next_word_after_seq(' '.join(current_words))
@@ -130,11 +112,15 @@ class MarkovGen:
         return sentence
 
 
+k = int(sys.argv[1]) if len(sys.argv) > 1 else 3
+chain_length = int(sys.argv[2]) if len(sys.argv) > 2 else 100
+data_path = sys.argv[3] if len(sys.argv) > 3 else "./data/Sherlock_Holmes"
+
+
 MG = MarkovGen(file_paths=[
-    Path('./data/John_Milton_Works/poems/'),
-    Path('./data/John_Milton_Works/prose/'),
-    Path('./data/John_Milton_Works/private_letters/')
+    Path(data_path)
 ])
-logger.info(f"Corpus size = {len(MG.corpus_index_map)}")
-MG.get_k_matrix(k=3)
-print(MG.stochastic_chain(seed=None, chain_length=100))
+logger.info(f"Unique tokens count = {len(MG.tokens_index_map)} \t k = {k}")
+MG.get_k_matrix(k=k)
+
+print(MG.stochastic_chain(seed=None, chain_length=chain_length))
