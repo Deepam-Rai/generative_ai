@@ -1,0 +1,6 @@
+cchardet
+coloredlogs
+numpy
+pypdf
+scipy
+torch
