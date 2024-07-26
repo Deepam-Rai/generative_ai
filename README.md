@@ -4,10 +4,10 @@ Testing and testing different techniques for generative AI.
 ----
 ## Markov chains
 Trains on the given data and tries to generate similar sentences.  
-High-overview: During training creates a matrix that maps last `k` tokens to the immediately following next token. During inference, given sequence of tokens, refers to the map-matrix and predicts next token.  
+**High-overview:** During training creates a matrix that maps last `k` tokens to the immediately following next token. During inference, given sequence of tokens, refers to the map-matrix and predicts next token.  
 ### Character wise tokenization
 File: `markov_chains.ipynb`  
-Given last k-characters predicts immediate following character, and thus generates senntence.  
+Given last k-characters predicts immediate following character, and thus generates sentence.  
 Generated samples:
 ```text
 
@@ -166,7 +166,7 @@ heart, poor sons, lamented for her,
  Why do you wring your hands
 ------------------------- END
 ```
-We can see that by `k=6` it has completely overfitted.  
+We can see that by `k=6` it has almost completely overfitted.  
 
 
 
