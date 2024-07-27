@@ -55,16 +55,6 @@ Which, thou know'st it well they return.
 AD
 ------------------------- END
 
-------------------------- GENERATED SENTENCE -- k = 11
-ng father:
-The sister to my wife.
-
-LUCENTIO:
-And therefore hurt not: but
-your people
-But tie him not to be gone
-------------------------- END
-
 ------------------------- GENERATED SENTENCE -- k = 14
 , speak too:
 Baccare! you are marvellous forward.
@@ -169,7 +159,6 @@ heart, poor sons, lamented for her,
 We can see that by `k=6` it has almost completely overfitted.  
 
 
-
 References:
 - https://www.kdnuggets.com/2019/11/markov-chains-train-text-generation.html
 
@@ -177,6 +166,70 @@ References:
 ----
 
 # RNN
+**High overview:** Given last output token and hidden state, predict next token. 
+```pypthon
+MODEL: RNNGen(
+  (embedding): Embedding(65, 256)
+  (gru): GRU(256, 1024, batch_first=True)
+  (out): Linear(in_features=1024, out_features=65, bias=True)
+)
+```
+
+## Character-wise tokenization
+File: `./RNN.ipynb`  
+Here we will train the model to predict the next character, given the current character and hidden state.  
+Example: for text, "To be or not to be", input-prediction mapping would look as follows:   
+```text
+Input:  ['T','o',' ','b','e',' ','o','r',' ','n','o','t',' ','t','o',' ','b'], # + hidden state 
+          |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+Target: ['o',' ','b','e',' ','o','r',' ','n','o','t',' ','t','o',' ','b','e'],
+```
+Generation samples:
+```text
+Vocab size: 65  Corpus size: 1215376 	seq_length = 100
+
+
+EPOCH : 1
+-------------------
+-gravive of all,
+I sup peace the bore to kill'd,
+Call who so I being eyes of hight,
+And then will we 
+-------------------
+
+
+EPOCH : 10
+-------------------
+Q$HAnd's my bad, Edwatozew,
+Whind.
+Grown the pitizenting,
+Go, dides macce:
+Oure crentild, ife.
+Urits 
+-------------------
+
+
+EPOCH : 20
+-------------------
+$lll, knew my duct.
+
+First Citizen:
+We had palms:
+That in with his head to my king,
+When Rome, to but
+-------------------
+
+
+EPOCH : 30
+-------------------
+ax-None.
+
+DUKE VINCENTIO:
+But when, then I was his life, and hold
+Shall have you:
+This o two will, si
+-------------------
+```
 
 References:
 - https://www.kdnuggets.com/2020/07/pytorch-lstm-text-generation-tutorial.html
