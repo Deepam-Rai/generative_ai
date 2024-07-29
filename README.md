@@ -186,6 +186,7 @@ Target: ['o',' ','b','e',' ','o','r',' ','n','o','t',' ','t','o',' ','b','e'],
 ```
 Generation samples:
 ```text
+DATASET:  data\Shakespeare
 Vocab size: 65  Corpus size: 1215376 	seq_length = 100
 
 
@@ -231,6 +232,89 @@ This o two will, si
 -------------------
 ```
 
+## Word-wise tokenization
+File: `./RNN.ipynb`  
+Here each word is taken as token.  
+Example: for text, "To be or not to be", we will train the model to predict the next character, given the current character and hidden state.  
+The input-prediction mapping would look as follows:   
+```python
+Input:     ['To','be','or', 'not','to'],
+            |     |    |     |     |
+Target:    ['be','or','not','to', 'be'],
+```
+
+Generationn sample:
+```text
+DATASET:  data\Shakespeare
+Vocab size: 14343  Corpus size: 329579 	 seq_length = 10
+
+EPOCH : 1
+-------------------
+plenty until unlike. 
+
+ Nurse: 
+ Yes, madam: yet still, ha! What fray?
+ Is' t verdict up Lancaster. 
+
+ PETRUCHIO: 
+ You peasant swain! you whoreson malt- horse drudge, that calls for company to
+
+-------------------
+
+EPOCH : 10
+-------------------
+errlight; 
+ But whiles none down that you
+ And what of him. Sirrah Biondello, 
+ Now do I turn your current in a ditch, 
+ And Roman Lucrece for her chastity: 
+ And, Montague, Montague, for I will not away. 
+
+-------------------
+
+EPOCH : 20
+-------------------
+feels, 
+ Making practise with thee: 
+ Be all, ' twixt a small-- angel and that so your heart
+ That you shall stifle in your own face, 
+ You. They say, her father counts it dangerous
+ Is that temptation that doth
+-------------------
+
+EPOCH : 30
+-------------------
+acknowledged spilt it is
+ in me; and at some known. 
+
+ TROILUS: 
+ The gods will I have often heard: such is as we hear, march of many kings, and I can I cheque my eyes would rather had eleven die nobly, 
+-------------------
+
+-------------------
+ JOHN OF GAUNT: 
+ No, no, 
+ Call me befall' n. 
+ After a storm, a husband for. 
+
+ BENVOLIO: 
+ By giving liberty, I say there is no kingdom; for answer you. 
+
+ CLIFFORD: 
+ My liege, and Kent the Guildfords are to- night
+ Have my heart for anger burns out of thine from advance
+ And two sleeves' s stomach. Will cry it: 
+ And words forty?
+
+ Pursuivant: 
+ God' s bread and garlic arm' d
+ That e' er the higher their hands, 
+ And whet the crown- hearted happier voice. Yes, I agree, 
+ Even with
+-------------------
+```
+
+---
 References:
 - https://www.kdnuggets.com/2020/07/pytorch-lstm-text-generation-tutorial.html
 - https://www.kaggle.com/code/abdulkhadarn/text-generation-with-character-based-rnn
