@@ -1,5 +1,6 @@
 # avoid models. too large file size
 models/checkpoints/*
+distilgpt2-finetuned-wikitext2/
 
 # rasa
 .config
